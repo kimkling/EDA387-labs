@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <stddef.h>
+#include <stdlib.h>
 
 #include <assert.h>
 #include <limits.h>
@@ -69,7 +70,11 @@ int main( int aArgc, char* aArgv[] )
     printf( "Resolving `%s' from `%s':\n", remoteHostName, localHostName );
 
     // sockaddr sock = {.sa_family = AF_INET};
-    struct addrinfo addr = {.ai_family = AF_UNSPEC, .ai_socktype = SOCK_STREAM, .ai_protocol = IPPROTO_TCP};
+    struct addrinfo addr = {};
+	addr.ai_family = AF_UNSPEC;
+	addr.ai_socktype = SOCK_STREAM;
+	addr.ai_protocol = IPPROTO_TCP;
+
     struct addrinfo *res, *rp;
 
     getaddrinfo(remoteHostName, NULL, &addr, &res);
@@ -86,7 +91,7 @@ int main( int aArgc, char* aArgv[] )
             printf("IPv4: '%s'\n", dst4);
         } else {
             sockaddr_in6 *addr_in = (sockaddr_in6 *) rp->ai_addr;
-            inet_ntop(AF_INET6, &addr_in->sin6_addr.__u6_addr, dst6, INET6_ADDRSTRLEN);
+            inet_ntop(AF_INET6, &addr_in->sin6_addr.s6_addr, dst6, INET6_ADDRSTRLEN);
             printf("IPv6: '%s'\n", dst6);
         }
     }
