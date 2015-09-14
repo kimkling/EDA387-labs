@@ -1,4 +1,7 @@
 # Lab 2
+Kim Kling
+Pontus Malm
+IT-12
 
 ## a.1
 actualAddr, that is bound to 0.0.0.0
@@ -10,12 +13,12 @@ b -> The socket closed successfully
 c -> The buffer contains the recieved data
 d -> The buffer is completely filled with the recieved data
 
-# Additionally, why is cd.buffer (see ConnectionData declaration) defined to be of size kTransferBufferSize+1 rather than just plain kTransferBufferSize?
+1 is added to kTransferBufferSize to allow space for the zero termination to be added when everything is received.
 
 ## a.3
 send() returns -1 if an error occurred.
 
-# How does MSG_NOSIGNAL relate to this (on linux machines)?
+MSG_NOSIGNAL tells the kernel that we want to handle the error, and not shutdown the process upon failure.
 
 ## c.1
 Only the first client recieves an answer.
