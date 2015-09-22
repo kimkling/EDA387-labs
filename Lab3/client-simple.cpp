@@ -103,6 +103,10 @@ int main( int argc, char* argv[] )
 		return 1;
 
 	// main loop: read user input, send to server and receive server reply
+
+	int set = 1;
+	setsockopt(connfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+
 	while( 1 )
 	{
 		char inputBuffer[kInputBufferSize];
@@ -132,10 +136,9 @@ int main( int argc, char* argv[] )
 		while( remaining > 0 )
 		{
 			ssize_t offset = inputLength - remaining;
-			ssize_t ret = send( connfd, 
+			ssize_t ret = write( connfd,
 				inputBuffer+offset, 
-				remaining,
-				MSG_NOSIGNAL
+				remaining
 			);
 
 			if( -1 == ret )
