@@ -1,7 +1,5 @@
 # Lab 2
-Kim Kling & Pontus Malm
-
-IT-12, MPCSN15
+Group 44, Kim Kling & Pontus Malm, MPCSN15
 
 ## a.1
 actualAddr, that is bound to 0.0.0.0
