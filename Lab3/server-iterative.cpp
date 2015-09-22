@@ -158,6 +158,9 @@ int main( int argc, char* argv[] )
 	// set up listening socket - see setup_server_socket() for details.
 	int listenfd = setup_server_socket( serverPort );
 
+	int set = 1;
+	setsockopt(listenfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
+
 	if( -1 == listenfd )
 		return 1;
 
@@ -271,10 +274,9 @@ static bool process_client_send( ConnectionData& cd )
 	assert( cd.state == eConnStateSending );
 
 	// send as much data as possible from buffer
-	ssize_t ret = send( cd.sock, 
+	ssize_t ret = write( cd.sock,
 		cd.buffer+cd.bufferOffset, 
-		cd.bufferSize-cd.bufferOffset,
-		MSG_NOSIGNAL // suppress SIGPIPE signals, generate EPIPE instead
+		cd.bufferSize-cd.bufferOffset
 	);
 
 	if( -1 == ret )
