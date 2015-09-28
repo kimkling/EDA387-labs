@@ -184,14 +184,15 @@ int main( int argc, char* argv[] )
         memcpy(&read, &set1, sizeof(set1));
         memcpy(&write, &set1, sizeof(set1));
 
-		// Add connections to read & write sets
+		for( size_t i = 0; i < connections.size(); ++i ) {
+			if(connections[i].state == eConnStateReceiving){
+				FD_SET(connections[i].sock, &read);
+			}else if(connections[i].state == eConnStateSending){
+				FD_SET(connections[i].sock, &write);
+			}
+		}
 
 		int selectready = select(maxfd + 1, &read, &write, 0, 0);
-
-		printf("Select: %d\n", selectready);
-		printf("Do we have data on listenfd? %d\n", FD_ISSET(listenfd, &read));
-
-		printf("Connection!\n");
 
         for (int i = 0; i < maxfd && selectready > 0; i++) {
 			if (FD_ISSET(i, &read) || FD_ISSET(i, &write)) {
