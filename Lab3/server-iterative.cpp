@@ -27,6 +27,7 @@
 
 #include <arpa/inet.h>
 #include <sys/types.h>
+#include <sys/time.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 
@@ -44,7 +45,7 @@
 // no blocking operations other than select() should occur. (If an blocking
 // operation is attempted, a EAGAIN or EWOULDBLOCK error is raised, probably
 // indicating a bug in the code!)
-#define NONBLOCKING 0
+#define NONBLOCKING 1
 
 
 // Default port of the server. May be overridden by specifying a different
@@ -164,11 +165,29 @@ int main( int argc, char* argv[] )
 	if( -1 == listenfd )
 		return 1;
 
+
+    struct timeval timeout;
+    timerclear(&timeout);
+	fd_set set1, master1;
+	FD_ZERO(&set1);
+	FD_SET(listenfd, &set1);
+    int maxfd = listenfd;
+
 	// loop forever
 	while( 1 )
 	{
 		sockaddr_in clientAddr;
 		socklen_t addrSize = sizeof(clientAddr);
+
+        memcpy(&set1, &master1, sizeof(set1));
+
+		int selectready = select(maxfd + 1, &master1, NULL, NULL, &timeout);
+
+        for (int i = 0; i < maxfd && selectready > 0; i++) {
+            if(FD_ISSET(i, &set1)) {
+                selectready--;
+            }
+        }
 
 		// accept a single incoming connection
 		int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
