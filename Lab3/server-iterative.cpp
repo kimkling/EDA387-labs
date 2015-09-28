@@ -169,40 +169,47 @@ int main( int argc, char* argv[] )
     struct timeval timeout;
     timerclear(&timeout);
 	timeout.tv_sec = 1;
-	fd_set set1, master1;
+	fd_set set1, read, write;
 	FD_ZERO(&set1);
 	FD_SET(listenfd, &set1);
     int maxfd = listenfd;
 	std::vector<ConnectionData> connections;
 
 	// loop forever
-	while( 1 )
+	while(set == 1)
 	{
 		sockaddr_in clientAddr;
 		socklen_t addrSize = sizeof(clientAddr);
 
-        memcpy(&master1, &set1, sizeof(set1));
+        memcpy(&read, &set1, sizeof(set1));
+        memcpy(&write, &set1, sizeof(set1));
 
-		int selectready = select(maxfd + 1, &master1, 0, 0, 0);
+		// Add connections to read & write sets
+
+		int selectready = select(maxfd + 1, &read, &write, 0, 0);
 
 		printf("Select: %d\n", selectready);
-		printf("Do we have data on listenfd? %d\n", FD_ISSET(listenfd, &master1));
+		printf("Do we have data on listenfd? %d\n", FD_ISSET(listenfd, &read));
 
 		printf("Connection!\n");
 
-		/*
         for (int i = 0; i < maxfd && selectready > 0; i++) {
-            if(FD_ISSET(i, &set1)) {
-                selectready--;
-            }
-        }
-        */
+			if (FD_ISSET(i, &read) || FD_ISSET(i, &write)) {
+				selectready--;
+			}
+			if (FD_ISSET(i, &read)) {
+				//while( processFurther && connData.state == eConnStateReceiving )
+				//	processFurther = process_client_recv( connData );
+			}
+			if (FD_ISSET(i, &write)) {
+				//while( processFurther && connData.state == eConnStateSending )
+				//processFurther = process_client_send( connData );
+			}
+		}
 
 		int clientfd;
-
-		if(selectready > 0 && FD_ISSET(listenfd, &master1)) {
+		if(selectready > 0 && FD_ISSET(listenfd, &read)) {
 			clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
-			selectready--;
 		}
 
 		// accept a single incoming connection
@@ -238,21 +245,15 @@ int main( int argc, char* argv[] )
 		connData.sock = clientfd;
 		connData.state = eConnStateReceiving;
 
+		connections.push_back(connData);
+
 		// Repeatedly receive and re-send data from the connection. When
 		// the connection closes, process_client_*() will return false, no
 		// further processing is done.
-		bool processFurther = true;
-		while( processFurther )
-		{
-			while( processFurther && connData.state == eConnStateReceiving )
-				processFurther = process_client_recv( connData );
 
-			while( processFurther && connData.state == eConnStateSending )
-				processFurther = process_client_send( connData );
-		}
 
 		// done - close connection
-		close( connData.sock );
+		//close( connData.sock );
 	}
 
 	// The program will never reach this part, but for demonstration purposes,
