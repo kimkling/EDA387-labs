@@ -168,10 +168,12 @@ int main( int argc, char* argv[] )
 
     struct timeval timeout;
     timerclear(&timeout);
+	timeout.tv_sec = 1;
 	fd_set set1, master1;
 	FD_ZERO(&set1);
 	FD_SET(listenfd, &set1);
     int maxfd = listenfd;
+	std::vector<ConnectionData> connections;
 
 	// loop forever
 	while( 1 )
@@ -179,18 +181,32 @@ int main( int argc, char* argv[] )
 		sockaddr_in clientAddr;
 		socklen_t addrSize = sizeof(clientAddr);
 
-        memcpy(&set1, &master1, sizeof(set1));
+        memcpy(&master1, &set1, sizeof(set1));
 
-		int selectready = select(maxfd + 1, &master1, NULL, NULL, &timeout);
+		int selectready = select(maxfd + 1, &master1, 0, 0, 0);
 
+		printf("Select: %d\n", selectready);
+		printf("Do we have data on listenfd? %d\n", FD_ISSET(listenfd, &master1));
+
+		printf("Connection!\n");
+
+		/*
         for (int i = 0; i < maxfd && selectready > 0; i++) {
             if(FD_ISSET(i, &set1)) {
                 selectready--;
             }
         }
+        */
+
+		int clientfd;
+
+		if(selectready > 0 && FD_ISSET(listenfd, &master1)) {
+			clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
+			selectready--;
+		}
 
 		// accept a single incoming connection
-		int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
+		// int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
 
 		if( -1 == clientfd )
 		{
