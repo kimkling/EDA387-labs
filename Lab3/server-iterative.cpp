@@ -174,6 +174,7 @@ int main( int argc, char* argv[] )
 	FD_SET(listenfd, &set1);
     int maxfd = listenfd;
 	std::vector<ConnectionData> connections;
+	int processFurther;
 
 	// loop forever
 	while(set == 1)
@@ -199,12 +200,14 @@ int main( int argc, char* argv[] )
 				selectready--;
 			}
 			if (FD_ISSET(i, &read)) {
-				//while( processFurther && connData.state == eConnStateReceiving )
-				//	processFurther = process_client_recv( connData );
+				processFurther = 1;
+				while(processFurther)
+					processFurther = process_client_recv( connData );
 			}
 			if (FD_ISSET(i, &write)) {
-				//while( processFurther && connData.state == eConnStateSending )
-				//processFurther = process_client_send( connData );
+				processFurther = 1;
+				while( processFurther )
+					processFurther = process_client_send( connData );
 			}
 		}
 
