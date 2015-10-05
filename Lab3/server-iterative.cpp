@@ -193,6 +193,8 @@ int main( int argc, char* argv[] )
 			}
 		}
 
+		// Recalculate maxfd
+
 		int selectready = select(maxfd + 1, &read, &write, 0, 0);
 
         for (int i = 0; i < maxfd && selectready > 0; i++) {
@@ -211,45 +213,45 @@ int main( int argc, char* argv[] )
 			}
 		}
 
-		int clientfd;
 		if(selectready > 0 && FD_ISSET(listenfd, &read)) {
-			clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
-		}
 
-		// accept a single incoming connection
-		// int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
+			int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
 
-		if( -1 == clientfd )
-		{
-			perror( "accept() failed" );
-			continue; // attempt to accept a different client.
-		}
+			// accept a single incoming connection
+			// int clientfd = accept( listenfd, (sockaddr*)&clientAddr, &addrSize );
+
+			if( -1 == clientfd )
+			{
+				perror( "accept() failed" );
+				continue; // attempt to accept a different client.
+			}
 
 #			if VERBOSE
-		// print some information about the new client
-		char buff[128];
-		printf( "Connection from %s:%d -> socket %d\n",
-			inet_ntop( AF_INET, &clientAddr.sin_addr, buff, sizeof(buff) ),
-			ntohs(clientAddr.sin_port),
-			clientfd
-		);
-		fflush( stdout );
+			// print some information about the new client
+			char buff[128];
+			printf( "Connection from %s:%d -> socket %d\n",
+					inet_ntop( AF_INET, &clientAddr.sin_addr, buff, sizeof(buff) ),
+					ntohs(clientAddr.sin_port),
+					clientfd
+			);
+			fflush( stdout );
 #			endif
 
 #			if NONBLOCKING
-		// enable non-blocking sends and receives on this socket
-		if( !set_socket_nonblocking( clientfd ) )
-			continue;
+			// enable non-blocking sends and receives on this socket
+			if( !set_socket_nonblocking( clientfd ) )
+				continue;
 #			endif
 
-		// initialize connection data
-		ConnectionData connData;
-		memset( &connData, 0, sizeof(connData) );
+			// initialize connection data
+			ConnectionData connData;
+			memset( &connData, 0, sizeof(connData) );
 
-		connData.sock = clientfd;
-		connData.state = eConnStateReceiving;
+			connData.sock = clientfd;
+			connData.state = eConnStateReceiving;
 
-		connections.push_back(connData);
+			connections.push_back(connData);
+		}
 
 		// Repeatedly receive and re-send data from the connection. When
 		// the connection closes, process_client_*() will return false, no
