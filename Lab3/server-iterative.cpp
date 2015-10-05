@@ -172,7 +172,7 @@ int main( int argc, char* argv[] )
 	fd_set set1, read, write;
 	FD_ZERO(&set1);
 	FD_SET(listenfd, &set1);
-    int maxfd = listenfd;
+    int maxfd;
 	std::vector<ConnectionData> connections;
 	int processFurther;
 
@@ -185,7 +185,10 @@ int main( int argc, char* argv[] )
         memcpy(&read, &set1, sizeof(set1));
         memcpy(&write, &set1, sizeof(set1));
 
+		maxfd = listenfd;
+
 		for( size_t i = 0; i < connections.size(); ++i ) {
+			maxfd = std::max(maxfd, connections[i].sock);
 			if(connections[i].state == eConnStateReceiving){
 				FD_SET(connections[i].sock, &read);
 			}else if(connections[i].state == eConnStateSending){
@@ -193,23 +196,20 @@ int main( int argc, char* argv[] )
 			}
 		}
 
-		// Recalculate maxfd
-
 		int selectready = select(maxfd + 1, &read, &write, 0, 0);
 
-        for (int i = 0; i < maxfd && selectready > 0; i++) {
-			if (FD_ISSET(i, &read) || FD_ISSET(i, &write)) {
-				selectready--;
-			}
-			if (FD_ISSET(i, &read)) {
-				processFurther = 1;
-				while(processFurther)
-					processFurther = process_client_recv( connData );
-			}
-			if (FD_ISSET(i, &write)) {
-				processFurther = 1;
-				while( processFurther )
-					processFurther = process_client_send( connData );
+		if(selectready > 0) {
+			for (size_t i = 0; i < connections.size(); ++i) {
+				if (FD_ISSET(connections[i].sock, &read)) {
+					processFurther = 1;
+					while (processFurther && connections[i].state == eConnStateReceiving)
+						processFurther = process_client_recv(connections[i]);
+
+				} else if (FD_ISSET(connections[i].sock, &write)) {
+					processFurther = 1;
+					while (processFurther && connections[i].state == eConnStateSending)
+						processFurther = process_client_send(connections[i]);
+				}
 			}
 		}
 
