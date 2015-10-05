@@ -207,18 +207,20 @@ int main( int argc, char* argv[] )
 					processFurther = process_client_send(connections[i]);
 				}
 				if(!processFurther) {
-					connections[i].sock = -1;
+					// connections[i].sock = -1;
+					printf("Deleting socket: %d\n", connections[i].sock);
 				}
 			}
 
 			for (int j = 0; j < connections.size(); ++j) {
 				if (connections[j].sock == -1) {
 					connections.erase(connections.begin() + j);
+					j--;
 				}
 			}
 
 			for (int j = 0; j < connections.size(); ++j) {
-				printf("Socket: %d/n", connections[j].sock);
+				printf("Socket: %d\n", connections[j].sock);
 			}
 		}
 
