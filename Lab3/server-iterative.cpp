@@ -201,15 +201,24 @@ int main( int argc, char* argv[] )
 		if(selectready > 0) {
 			for (size_t i = 0; i < connections.size(); ++i) {
 				if (FD_ISSET(connections[i].sock, &read)) {
-					processFurther = 1;
-					while (processFurther && connections[i].state == eConnStateReceiving)
-						processFurther = process_client_recv(connections[i]);
+					processFurther = process_client_recv(connections[i]);
 
 				} else if (FD_ISSET(connections[i].sock, &write)) {
-					processFurther = 1;
-					while (processFurther && connections[i].state == eConnStateSending)
-						processFurther = process_client_send(connections[i]);
+					processFurther = process_client_send(connections[i]);
 				}
+				if(!processFurther) {
+					connections[i].sock = -1;
+				}
+			}
+
+			for (int j = 0; j < connections.size(); ++j) {
+				if (connections[j].sock == -1) {
+					connections.erase(connections.begin() + j);
+				}
+			}
+
+			for (int j = 0; j < connections.size(); ++j) {
+				printf("Socket: %d/n", connections[j].sock);
 			}
 		}
 
