@@ -174,7 +174,6 @@ int main( int argc, char* argv[] )
 	FD_SET(listenfd, &set1);
     int maxfd;
 	std::vector<ConnectionData> connections;
-	int processFurther;
 
 	// loop forever
 	while(set == 1)
@@ -200,27 +199,26 @@ int main( int argc, char* argv[] )
 
 		if(selectready > 0) {
 			for (size_t i = 0; i < connections.size(); ++i) {
-				if (FD_ISSET(connections[i].sock, &read)) {
-					processFurther = process_client_recv(connections[i]);
 
-				} else if (FD_ISSET(connections[i].sock, &write)) {
-					processFurther = process_client_send(connections[i]);
+				if (FD_ISSET(connections[i].sock, &write)) {
+					process_client_send(connections[i]);
 				}
-				if(!processFurther) {
-					// connections[i].sock = -1;
-					printf("Deleting socket: %d\n", connections[i].sock);
+
+				if (FD_ISSET(connections[i].sock, &read)) {
+					bool processFurther = process_client_recv(connections[i]);
+					if(!processFurther) {
+						printf("Marking socket for deletion: %d\n", connections[i].sock);
+						connections[i].sock = -1;
+					}
 				}
 			}
 
 			for (int j = 0; j < connections.size(); ++j) {
 				if (connections[j].sock == -1) {
+					printf("Deleting socket\n");
 					connections.erase(connections.begin() + j);
 					j--;
 				}
-			}
-
-			for (int j = 0; j < connections.size(); ++j) {
-				printf("Socket: %d\n", connections[j].sock);
 			}
 		}
 
