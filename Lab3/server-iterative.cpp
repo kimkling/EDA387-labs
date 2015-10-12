@@ -158,7 +158,6 @@ int main( int argc, char* argv[] )
 
 	// set up listening socket - see setup_server_socket() for details.
 	int listenfd = setup_server_socket( serverPort );
-	int set = 1;
 
 	if( -1 == listenfd )
 		return 1;
@@ -172,7 +171,7 @@ int main( int argc, char* argv[] )
 	std::vector<ConnectionData> connections;
 
 	// loop forever
-	while(set == 1)
+	while(true)
 	{
 		sockaddr_in clientAddr;
 		socklen_t addrSize = sizeof(clientAddr);
