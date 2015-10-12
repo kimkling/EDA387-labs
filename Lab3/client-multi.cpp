@@ -393,9 +393,6 @@ static bool client_process_send( size_t cid, ConnectionData& cd )
 		int error = 0;
 		socklen_t errlen = sizeof(error);
 
-		int set = 1;
-		setsockopt(cd.sock, SOL_SOCKET, SO_NOSIGPIPE, (void *)&set, sizeof(int));
-
 		int ret = getsockopt( cd.sock, SOL_SOCKET, SO_ERROR, &error, &errlen );
 
 		if( -1 == ret )
@@ -433,9 +430,10 @@ static bool client_process_send( size_t cid, ConnectionData& cd )
 	}
 
 	// send as much data as possible
-	int ret = write( cd.sock,
+	int ret = send( cd.sock, 
 		cd.buffer+cd.bufferOffset, 
-		cd.bufferSize-cd.bufferOffset
+		cd.bufferSize-cd.bufferOffset,
+		MSG_NOSIGNAL
 	);
 
 	if( ret == -1 )
