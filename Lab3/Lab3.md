@@ -13,6 +13,21 @@ tcp        0      0 localhost:5703              localhost:34644             ESTA
 
 ## a.2
 
+```
+Simulating 100 clients.
+Establishing 100 connections... 
+  successfully initiated 100 connection attempts!
+Connect timing results for 100 successful connections
+  - min time: 0.990722 ms
+  - max time: 6.016197 ms
+  - average time: 2.417829 ms
+ (0 connections failed!)
+Roundtrip timing results for 100 connections for 10000 round trips
+  - min time: 2894.553222 ms
+  - max time: 3669.167915 ms
+  - average time: 3440.605040 ms
+```
+
 * a -> Error occurred
 * b -> The socket closed successfully
 * c -> The buffer contains the recieved data
