@@ -4,6 +4,13 @@ Group 44, Kim Kling & Pontus Malm, MPCSN15
 ## a.1
 We do receive the response immediately. Netstat tells us that the connection is established.
 
+```
+tcp        0      0 localhost:34644             localhost:5703              ESTABLISHED 
+tcp        0      0 localhost:5703              localhost:34645             ESTABLISHED 
+tcp        0      0 localhost:34645             localhost:5703              ESTABLISHED 
+tcp        0      0 localhost:5703              localhost:34644             ESTABLISHED
+```
+
 ## a.2
 
 * a -> Error occurred
