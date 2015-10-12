@@ -207,19 +207,18 @@ int main( int argc, char* argv[] )
 				if (FD_ISSET(connections[i].sock, &read)) {
 					bool processFurther = process_client_recv(connections[i]);
 					if(!processFurther) {
+						close(connections[i].sock);
 						printf("Marking socket for deletion: %d\n", connections[i].sock);
 						connections[i].sock = -1;
 					}
 				}
 			}
 
-			for (int j = 0; j < connections.size(); ++j) {
-				if (connections[j].sock == -1) {
-					printf("Deleting socket\n");
-					connections.erase(connections.begin() + j);
-					j--;
-				}
-			}
+			connections.erase(
+					std::remove_if(
+							connections.begin(), connections.end(), &is_invalid_connection
+					), connections.end()
+			);
 		}
 
 		if(selectready > 0 && FD_ISSET(listenfd, &read)) {
