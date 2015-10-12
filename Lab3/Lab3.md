@@ -5,18 +5,16 @@ Group 44, Kim Kling & Pontus Malm, MPCSN15
 We do receive the response immediately. Netstat tells us that the connection is established.
 
 ```
-tcp        0      0 localhost:34644             localhost:5703              ESTABLISHED 
-tcp        0      0 localhost:5703              localhost:34645             ESTABLISHED 
-tcp        0      0 localhost:34645             localhost:5703              ESTABLISHED 
-tcp        0      0 localhost:5703              localhost:34644             ESTABLISHED
+tcp    0     0 localhost:34644     localhost:5703      ESTABLISHED 
+tcp    0     0 localhost:5703      localhost:34645     ESTABLISHED 
+tcp    0     0 localhost:34645     localhost:5703      ESTABLISHED 
+tcp    0     0 localhost:5703      localhost:34644     ESTABLISHED
 ```
 
 ## a.2
+Below is our timing for the concurrent server and the iterative server. The concurrent server handles multiple clients well, and the time clients need to spend waiting is minimized.
 
 ```
-Simulating 100 clients.
-Establishing 100 connections... 
-  successfully initiated 100 connection attempts!
 Connect timing results for 100 successful connections
   - min time: 0.990722 ms
   - max time: 6.016197 ms
@@ -40,11 +38,5 @@ Roundtrip timing results for 64 connections for 10000 round trips
   - average time: 3230.925516 ms
 ```
 
-* a -> Error occurred
-* b -> The socket closed successfully
-* c -> The buffer contains the recieved data
-* d -> The buffer is completely filled with the recieved data
-
-1 is added to kTransferBufferSize to allow space for the zero termination to be added when everything is received.
-
 ## a.3
+This attack is no longer possible since the server can serve multiple clients, at the same time.
