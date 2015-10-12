@@ -28,6 +28,18 @@ Roundtrip timing results for 100 connections for 10000 round trips
   - average time: 3440.605040 ms
 ```
 
+```
+Connect timing results for 100 successful connections
+  - min time: 3.168992 ms
+  - max time: 15000.369521 ms
+  - average time: 5480.162936 ms
+ (0 connections failed!)
+Roundtrip timing results for 64 connections for 10000 round trips
+  - min time: 230.742278 ms
+  - max time: 7289.022922 ms
+  - average time: 3230.925516 ms
+```
+
 * a -> Error occurred
 * b -> The socket closed successfully
 * c -> The buffer contains the recieved data
