@@ -166,12 +166,10 @@ int main( int argc, char* argv[] )
 		return 1;
 
 
-    struct timeval timeout;
-    timerclear(&timeout);
-	timeout.tv_sec = 1;
-	fd_set set1, read, write;
-	FD_ZERO(&set1);
-	FD_SET(listenfd, &set1);
+    //struct timeval timeout;
+    //timerclear(&timeout);
+	//timeout.tv_sec = 1;
+	fd_set read, write;
     int maxfd;
 	std::vector<ConnectionData> connections;
 
@@ -181,9 +179,10 @@ int main( int argc, char* argv[] )
 		sockaddr_in clientAddr;
 		socklen_t addrSize = sizeof(clientAddr);
 
-        memcpy(&read, &set1, sizeof(set1));
-        memcpy(&write, &set1, sizeof(set1));
+		FD_ZERO(&read);
+		FD_ZERO(&write);
 
+		FD_SET(listenfd, &read);
 		maxfd = listenfd;
 
 		for( size_t i = 0; i < connections.size(); ++i ) {
@@ -199,18 +198,17 @@ int main( int argc, char* argv[] )
 
 		if(selectready > 0) {
 			for (size_t i = 0; i < connections.size(); ++i) {
-
+				bool keep = true;
 				if (FD_ISSET(connections[i].sock, &write)) {
-					process_client_send(connections[i]);
+					keep = process_client_send(connections[i]);
+				} else if (FD_ISSET(connections[i].sock, &read)) {
+					keep = process_client_recv(connections[i]);
 				}
 
-				if (FD_ISSET(connections[i].sock, &read)) {
-					bool processFurther = process_client_recv(connections[i]);
-					if(!processFurther) {
-						close(connections[i].sock);
-						printf("Marking socket for deletion: %d\n", connections[i].sock);
-						connections[i].sock = -1;
-					}
+				if(!keep) {
+					close(connections[i].sock);
+					printf("Marking socket for deletion: %d\n", connections[i].sock);
+					connections[i].sock = -1;
 				}
 			}
 
